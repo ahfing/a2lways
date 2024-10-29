@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login with LINE</title>
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>Login with LINE</h1>
+  <button id="loginBtn">Login</button>
+  
+  <!-- Section to show user profile after login -->
+  <div id="profile" style="display:none;">
+    <img id="profilePic" width="100" height="100" />
+    <p id="userId"></p>
+    <p id="userName"></p>
+    <p id="userEmail"></p>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <script>
+    // เริ่มการใช้งาน LIFF
+    function initializeLiff() {
+      liff.init({ liffId: 'YOUR_LIFF_ID' }) // ใช้ LIFF ID ที่ได้จาก LINE Developer Console
+        .then(() => {
+          if (!liff.isLoggedIn()) {
+            document.getElementById('loginBtn').style.display = 'block';
+          } else {
+            document.getElementById('loginBtn').style.display = 'none';
+            getUserProfile();
+          }
+        })
+        .catch(err => console.error('LIFF Initialization failed', err));
+    }
+
+    // ดึงข้อมูลผู้ใช้หลังจากล็อกอินสำเร็จ
+    function getUserProfile() {
+      liff.getProfile()
+        .then(profile => {
+          document.getElementById('profile').style.display = 'block';
+          document.getElementById('profilePic').src = profile.pictureUrl;
+          document.getElementById('userId').innerText = 'User ID: ' + profile.userId;
+          document.getElementById('userName').innerText = 'Name: ' + profile.displayName;
+
+          liff.getDecodedIDToken().then(idToken => {
+            document.getElementById('userEmail').innerText = 'Email: ' + idToken.email;
+          });
+
+        })
+        .catch(err => console.error('Failed to get profile', err));
+    }
+
+    // ฟังก์ชันสำหรับ Login
+    document.getElementById('loginBtn').addEventListener('click', function () {
+      liff.login(); // ทำการ login ผ่าน LINE
+    });
+
+    // ฟังก์ชันสำหรับ Logout
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      liff.logout(); // ทำการ logout
+      window.location.reload(); // Reload หน้าเว็บหลังจาก logout
+    });
+
+    // เรียกใช้งาน LIFF SDK เมื่อตอนโหลดหน้าเว็บ
+    initializeLiff();
+  </script>
+</body>
+</html>
