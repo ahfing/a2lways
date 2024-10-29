@@ -9,6 +9,8 @@
 </head>
 <body>
   <h1>Login with LINE</h1>
+  <label for="customerId">Enter your customer ID:</label>
+  <input type="text" id="customerId" placeholder="Customer ID" required>
   <button id="loginBtn">Login</button>
   
   <!-- Section to show user profile after login -->
@@ -54,8 +56,49 @@
 
     // ฟังก์ชันสำหรับ Login
     document.getElementById('loginBtn').addEventListener('click', function () {
-      liff.login(); // ทำการ login ผ่าน LINE
+      var customerId = document.getElementById('customerId').value;
+
+      if (customerId) {
+        // ส่งรหัสลูกค้าไปตรวจสอบกับ Google Apps Script ก่อนทำการ login
+        checkCustomerId(customerId).then(isValid => {
+          if (isValid) {
+            liff.login(); // ทำการ login ผ่าน LINE
+          } else {
+            alert('Customer ID not found, please check again.');
+          }
+        });
+      } else {
+        alert('Please enter your customer ID.');
+      }
     });
+
+    // ฟังก์ชันตรวจสอบรหัสลูกค้าผ่าน Google Apps Script
+    function checkCustomerId(customerId) {
+      return new Promise((resolve, reject) => {
+        // ใส่ URL ของ Google Apps Script ที่ใช้ตรวจสอบรหัสลูกค้า
+        var scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
+
+        fetch(scriptURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ customerId: customerId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'valid') {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          reject(false);
+        });
+      });
+    }
 
     // ฟังก์ชันสำหรับ Logout
     document.getElementById('logoutBtn').addEventListener('click', function () {
