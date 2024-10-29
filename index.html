@@ -87,9 +87,12 @@
         })
         .then(response => response.json())
         .then(data => {
+          console.log("Response from Google Apps Script: ", data); // แสดงผลใน console
           if (data.status === 'valid') {
+            console.log('Customer ID found, proceeding with login...');
             resolve(true);
           } else {
+            console.log('Customer ID not found, aborting login...');
             resolve(false);
           }
         })
